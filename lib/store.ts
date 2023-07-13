@@ -2,10 +2,7 @@ import { ColumnDef } from '@tanstack/react-table'
 import { create } from 'zustand'
 
 
-export interface TableState {
-  columns: ColumnDef<Payment>[]
-  data: Payment[]
-}
+
 
 export type Payment = {
   id: string;
@@ -39,7 +36,7 @@ export const initColumn: ColumnDef<Payment>[] = [
       const dateString = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`
       return dateString
     }
-  }
+  },
 ]
 
 export const paymentTableSchema = {
@@ -116,9 +113,16 @@ export const payments: Payment[] = [
   },
 ];
 
+export interface TableState {
+  columns: ColumnDef<Payment>[]
+  data: Payment[]
+}
 
+export interface TableAction {
+  updateColumn: (column_id: number, field:ColumnDef<Payment>) => void
+}
 
-const useTableState = create<TableState>((set) => ({
+const useTableState = create<TableState & TableAction>((set) => ({
   columns: initColumn,
   data: payments,
   updateColumn: (column_id: number, field:ColumnDef<Payment>) => set((state) => ({ columns: [...state.columns.slice(0,column_id), field, ...state.columns.slice(column_id + 1)] }))
