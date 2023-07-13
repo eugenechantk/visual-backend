@@ -1,9 +1,6 @@
 import { ColumnDef } from '@tanstack/react-table'
 import { create } from 'zustand'
 
-
-
-
 export type Payment = {
   id: string;
   amount: number;
@@ -38,6 +35,11 @@ export const initColumn: ColumnDef<Payment>[] = [
     }
   },
 ]
+
+const newColumn = {
+  id: 'new',
+  header: '',
+}
 
 export const paymentTableSchema = {
   id: {
@@ -115,17 +117,23 @@ export const payments: Payment[] = [
 
 export interface TableState {
   columns: ColumnDef<Payment>[]
-  data: Payment[]
+  data: Payment[],
+  selectedColumnIndex: number | null
 }
 
 export interface TableAction {
-  updateColumn: (column_id: number, field:ColumnDef<Payment>) => void
+  updateColumn: (column_id: number, field:ColumnDef<Payment>) => void,
+  addNewColumn: (column_id: number) => void,
+  setSelectedColumn: (column_id: number) => void,
 }
 
 const useTableState = create<TableState & TableAction>((set) => ({
   columns: initColumn,
   data: payments,
-  updateColumn: (column_id: number, field:ColumnDef<Payment>) => set((state) => ({ columns: [...state.columns.slice(0,column_id), field, ...state.columns.slice(column_id + 1)] }))
+  selectedColumnIndex: null,
+  updateColumn: (column_id: number, field:ColumnDef<Payment>) => set((state) => ({ columns: [...state.columns.slice(0,column_id), field, ...state.columns.slice(column_id + 1)] })),
+  addNewColumn: (column_id:number) => set((state) => ({ columns: [...state.columns.slice(0,column_id), newColumn, ...state.columns.slice(column_id + 1)] })),
+  setSelectedColumn: (column_id:number) => set((state) => ({ selectedColumnIndex: column_id }))
 }))
 
 export default useTableState

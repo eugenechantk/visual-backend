@@ -1,4 +1,4 @@
-import * as React from "react"
+import * as React from "react";
 import {
   ColumnDef,
   flexRender,
@@ -6,7 +6,7 @@ import {
   useReactTable,
   SortingState,
   getSortedRowModel,
-} from "@tanstack/react-table"
+} from "@tanstack/react-table";
 import {
   Table,
   TableBody,
@@ -14,18 +14,20 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
- 
+} from "@/components/ui/table";
+import { PlusIcon } from "lucide-react";
+import useTableState from "@/lib/store";
+
 interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[]
-  data: TData[]
+  columns: ColumnDef<TData, TValue>[];
+  data: TData[];
 }
- 
+
 export function BuilderTable<TData, TValue>({
   columns,
   data,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([])
+  const [sorting, setSorting] = React.useState<SortingState>([]);
   const table = useReactTable({
     data,
     columns,
@@ -35,11 +37,12 @@ export function BuilderTable<TData, TValue>({
     state: {
       sorting,
     },
-  })
- 
+  });
+  const addNewColumn = useTableState((state) => state.addNewColumn);
+
   return (
-    <div className="rounded-md border">
-      <Table>
+    <div className="flex flex-row">
+      <Table className="rounded-md border">
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (
             <TableRow key={headerGroup.id}>
@@ -53,7 +56,7 @@ export function BuilderTable<TData, TValue>({
                           header.getContext()
                         )}
                   </TableHead>
-                )
+                );
               })}
             </TableRow>
           ))}
@@ -81,6 +84,12 @@ export function BuilderTable<TData, TValue>({
           )}
         </TableBody>
       </Table>
+      <button
+        className="px-2 py-1 w-fit h-fit bg-white border border-gray-200"
+        onClick={() => addNewColumn(columns.length)}
+      >
+        <PlusIcon />
+      </button>
     </div>
-  )
+  );
 }
