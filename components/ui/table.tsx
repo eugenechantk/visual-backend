@@ -3,6 +3,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useDrop } from "react-dnd";
 import { ItemTypes } from "@/pages";
+import useTableState from "@/lib/store";
 
 const Table = React.forwardRef<
   HTMLTableElement,
@@ -70,18 +71,25 @@ const TableRow = React.forwardRef<
 TableRow.displayName = "TableRow";
 
 interface TableHeadProps extends React.ThHTMLAttributes<HTMLTableCellElement> {
-  droppable?: boolean
+  droppable?: boolean,
+  index?: number,
 }
 
 const TableHead = React.forwardRef<
   HTMLTableCellElement,
   TableHeadProps
->(({ className, ...props }) => {
+>(({ className, index, ...props }) => {
+  const updateColumn = useTableState((state) => state.updateColumn)
   const [{isOver}, drop] = useDrop(
     () => ({
       accept: ItemTypes.FIELD_TAGS,
       drop: (item: {id: string, field_name: string}) => {
-        console.log(`dropped ${item.field_name} with id ${item.id}`)
+        console.log(`dropped ${item.field_name} with id ${item.id} at column_id ${index}`)
+        const newColumn = {
+          accessorKey: item.id,
+          header: item.field_name,
+        }
+        updateColumn(index!, newColumn)
         return undefined
       },
       collect: (monitor) => ({
