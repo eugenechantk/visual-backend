@@ -21,7 +21,6 @@ const TableHeader = React.forwardRef<
   HTMLTableSectionElement,
   React.HTMLAttributes<HTMLTableSectionElement>
 >(({ className, ...props }, ref) => {
-  
   return (
     <thead ref={ref} className={cn("[&_tr]:border-b", className)} {...props} />
   );
@@ -71,43 +70,73 @@ const TableRow = React.forwardRef<
 TableRow.displayName = "TableRow";
 
 interface TableHeadProps extends React.ThHTMLAttributes<HTMLTableCellElement> {
-  droppable?: boolean,
-  index?: number,
+  droppable?: boolean;
+  index?: number;
 }
 
-const TableHead = React.forwardRef<
-  HTMLTableCellElement,
-  TableHeadProps
->(({ className, index, ...props }) => {
-  const updateColumn = useTableState((state) => state.updateColumn)
-  const [{isOver}, drop] = useDrop(
-    () => ({
+const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
+  ({ className, index, ...props }) => {
+    const updateColumn = useTableState((state) => state.updateColumn);
+    const [showInlineMenu, setShowInlineMenu] = React.useState(false);
+    const [leftOffset, setLeftOffset] = React.useState(0);
+    const headerRef = React.useRef<HTMLTableCellElement>(null);
+
+    const [{ isOver }, drop] = useDrop(() => ({
       accept: ItemTypes.FIELD_TAGS,
-      drop: (item: {id: string, field_name: string}) => {
-        console.log(`dropped ${item.field_name} with id ${item.id} at column_id ${index}`)
+      drop: (item: { id: string; field_name: string }) => {
+        console.log(
+          `dropped ${item.field_name} with id ${item.id} at column_id ${index}`
+        );
         const newColumn = {
           accessorKey: item.id,
           header: item.field_name,
-        }
-        updateColumn(index!, newColumn)
-        return undefined
+        };
+        updateColumn(index!, newColumn);
+        return undefined;
       },
       collect: (monitor) => ({
         isOver: monitor.isOver(),
-      })
-    }),
-  )
-  return (
-  <th
-    ref={drop}
-    className={cn(
-      "h-12 px-4 text-left align-middle font-medium text-slate-500 [&:has([role=checkbox])]:pr-0 dark:text-slate-400",
-      isOver && "outline outline-offset-2 outline-indigo-600 rounded-sm",
-      className
-    )}
-    {...props}
-  />)
-});
+      }),
+    }));
+
+    React.useEffect(() => {
+      if (headerRef.current) {
+        const columnWidth = headerRef.current.getBoundingClientRect().width;
+        setLeftOffset((columnWidth-32-120) / 2)
+      }
+    }, []);
+
+    return (
+      <th
+        ref={(el: HTMLTableCellElement) => {
+          // @ts-ignore
+          drop(el); headerRef.current = el;
+        }}
+        className={cn(
+          "h-12 px-4 text-left align-middle font-medium text-slate-500 [&:has([role=checkbox])]:pr-0 dark:text-slate-400 cursor-pointer relative",
+          isOver && "outline outline-offset-2 outline-indigo-600 rounded-sm",
+          "hover:outline hover:outline-offset-2 hover:outline-indigo-600 hover:rounded-sm",
+          "active:outline active:outline-offset-2 active:outline-indigo-600 active:rounded-sm",
+          className
+        )}
+        {...props}
+        onClick={() => {
+          console.log(leftOffset)
+          setShowInlineMenu(!showInlineMenu);
+        }}
+      >
+        <div
+          className={cn(
+            `absolute -top-[40px] w-[120px] h-[30px] rounded-sm bg-gray-200`,
+            showInlineMenu ? "visible" : "hidden",
+          )}
+          style={{ marginLeft: leftOffset }}
+        ></div>
+        {props.children}
+      </th>
+    );
+  }
+);
 TableHead.displayName = "TableHead";
 
 const TableCell = React.forwardRef<
