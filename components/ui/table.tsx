@@ -69,9 +69,13 @@ const TableRow = React.forwardRef<
 ));
 TableRow.displayName = "TableRow";
 
+interface TableHeadProps extends React.ThHTMLAttributes<HTMLTableCellElement> {
+  droppable?: boolean
+}
+
 const TableHead = React.forwardRef<
   HTMLTableCellElement,
-  React.ThHTMLAttributes<HTMLTableCellElement>
+  TableHeadProps
 >(({ className, ...props }) => {
   const [{isOver}, drop] = useDrop(
     () => ({
