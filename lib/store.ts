@@ -1,5 +1,5 @@
-import { ColumnDef } from '@tanstack/react-table'
-import { create } from 'zustand'
+import { ColumnDef } from "@tanstack/react-table";
+import { create } from "zustand";
 
 export type Payment = {
   id: string;
@@ -27,65 +27,67 @@ export const initColumn: ColumnDef<Payment>[] = [
   {
     accessorKey: "loanStartDate",
     header: "Loan Start Date",
-    cell: ({row}) => {
+    cell: ({ row }) => {
       // convert the Date object to a string in the format of "MM/DD/YYYY"
-      const date = row.original.loanStartDate
-      const dateString = `${date.getMonth() + 1}/${date.getDate()}/${date.getFullYear()}`
-      return dateString
-    }
+      const date = row.original.loanStartDate;
+      const dateString = `${
+        date.getMonth() + 1
+      }/${date.getDate()}/${date.getFullYear()}`;
+      return dateString;
+    },
   },
-]
+];
 
 const newColumn = {
-  id: 'new',
-  header: '',
-}
+  id: "new",
+  header: "",
+};
 
 export const paymentTableSchema = {
   id: {
-    id: 'id',
-    name: 'Id',
+    id: "id",
+    name: "Id",
     type: "string",
     unique: true,
     primary: true,
   },
   amount: {
-    id: 'amount',
-    name: 'Amount',
+    id: "amount",
+    name: "Amount",
     type: "number",
     required: true,
   },
   status: {
-    id: 'status',
-    name: 'Status',
+    id: "status",
+    name: "Status",
     type: "string",
     required: true,
   },
   email: {
-    id: 'email',
-    name: 'Email',
+    id: "email",
+    name: "Email",
     type: "string",
     required: true,
   },
   loanStartDate: {
-    id: 'loanStartDate',
-    name: 'Loan Start Date',
+    id: "loanStartDate",
+    name: "Loan Start Date",
     type: "date",
     required: true,
   },
   loanEndDate: {
-    id: 'loanEndDate',
-    name: 'Loan End Date',
+    id: "loanEndDate",
+    name: "Loan End Date",
     type: "date",
     required: false,
   },
   amountPaid: {
-    id: 'amountPaid',
-    name: 'Amount Paid',
+    id: "amountPaid",
+    name: "Amount Paid",
     type: "number",
     required: true,
-  }
-}
+  },
+};
 
 export const payments: Payment[] = [
   {
@@ -116,24 +118,100 @@ export const payments: Payment[] = [
 ];
 
 export interface TableState {
-  columns: ColumnDef<Payment>[]
-  data: Payment[],
-  selectedColumnIndex: number | null
+  columns: ColumnDef<Payment>[];
+  data: Payment[];
+  selectedColumnIndex: number | null;
 }
 
 export interface TableAction {
-  updateColumn: (column_id: number, field:ColumnDef<Payment>) => void,
-  addNewColumn: (column_id: number) => void,
-  setSelectedColumn: (column_id: number) => void,
+  updateColumn: (column_id: number, field: ColumnDef<Payment>) => void;
+  addNewColumn: (column_id: number) => void;
+  setSelectedColumn: (column_id: number) => void;
 }
 
 const useTableState = create<TableState & TableAction>((set) => ({
   columns: initColumn,
   data: payments,
   selectedColumnIndex: null,
-  updateColumn: (column_id: number, field:ColumnDef<Payment>) => set((state) => ({ columns: [...state.columns.slice(0,column_id), field, ...state.columns.slice(column_id + 1)] })),
-  addNewColumn: (column_id:number) => set((state) => ({ columns: [...state.columns.slice(0,column_id), newColumn, ...state.columns.slice(column_id + 1)] })),
-  setSelectedColumn: (column_id:number) => set((state) => ({ selectedColumnIndex: column_id }))
-}))
+  updateColumn: (column_id: number, field: ColumnDef<Payment>) =>
+    set((state) => ({
+      columns: [
+        ...state.columns.slice(0, column_id),
+        field,
+        ...state.columns.slice(column_id + 1),
+      ],
+    })),
+  addNewColumn: (column_id: number) =>
+    set((state) => ({
+      columns: [
+        ...state.columns.slice(0, column_id),
+        newColumn,
+        ...state.columns.slice(column_id + 1),
+      ],
+    })),
+  setSelectedColumn: (column_id: number) =>
+    set((state) => ({ selectedColumnIndex: column_id })),
+}));
 
-export default useTableState
+export type TableComponentData = {
+  table_name: string;
+  columns: ColumnDef<any>[];
+};
+
+type TextComponentData = {
+  data: {};
+};
+
+type AppState = {
+  components: Record<
+    string,
+    { component_type: string; data: TableComponentData | TextComponentData }
+  >;
+};
+
+type AppAction = {
+  updateColumn: (componentId: string, columnId: number, newColumn: ColumnDef<any>) => void;
+}
+
+const initAppState: AppState = {
+  components: {
+    "table-12345678": {
+      component_type: "table",
+      data: {
+        table_name: "Payments",
+        columns: [
+          {
+            accessorKey: "status",
+            header: "Status",
+          },
+          {
+            accessorKey: "email",
+            header: "Email",
+          }
+        ]
+      }
+    }
+  }
+}
+
+export const useAppState = create<AppState & AppAction>((set) => ({
+  components: initAppState.components,
+  updateColumn: (componentId: string, columnId: number, newColumn: ColumnDef<any>) => set((state) => ({
+    components: {
+      ...state.components,
+      [componentId]: {
+        ...state.components[componentId],
+        data: {
+          ...state.components[componentId].data,
+          columns: [
+            ...(state.components[componentId].data as TableComponentData).columns.slice(0, columnId),
+            newColumn,
+            ...(state.components[componentId].data as TableComponentData).columns.slice(columnId + 1),
+          ]
+        }
+      }
+    }
+  })),
+}));
+
+export default useTableState;
