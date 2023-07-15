@@ -16,7 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PlusIcon } from "lucide-react";
-import useAppState from "@/lib/store";
+import useAppState, { TableComponentData, payments } from "@/lib/store";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -24,71 +24,39 @@ interface DataTableProps<TData, TValue> {
 }
 
 export function BuilderTable<TData, TValue>({
-  columns,
   data,
 }: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
   const updateColumn = useAppState((state) => state.updateColumn);
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    state: {
-      sorting,
-    },
-  });
-  
+  const columns = useAppState(
+    (state) =>
+      (state.components["table-12345678"].data as TableComponentData).columns
+  );
+
   const addNewColumn = (columnLength: number) => {
-    updateColumn('table-12345678', columnLength, {
-      id: "new",
+    updateColumn("table-12345678", columnLength, {
+      accessorKey: "new",
       header: "",
-    })
-  }
+    });
+  };
 
   return (
     <div className="flex flex-row">
       <Table className="rounded-md border">
         <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header, index) => {
-                return (
-                  <TableHead key={index} index={header.index}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
+          <TableRow>
+            {columns.map((column, index) => (
+              <TableHead key={index}>{column.header}</TableHead>
+            ))}
+          </TableRow>
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row, index) => (
-              <TableRow
-                key={index}
-                data-state={row.getIsSelected() && "selected"}
-              >
-                {row.getVisibleCells().map((cell, index) => (
-                  <TableCell key={index}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))
-          ) : (
-            <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
-                No results.
-              </TableCell>
+          {data.map((row, index) => (
+            <TableRow key={index}>
+              {columns.map((col, index) => (
+                <TableCell key={index}>{row[col.accessorKey]}</TableCell>
+              ))}
             </TableRow>
-          )}
+          ))}
         </TableBody>
       </Table>
       <button
