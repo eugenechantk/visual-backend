@@ -5,8 +5,8 @@ import DatabasePanelContainer from "@/components/DatabasePanel/DatabasePanelCont
 import { DndProvider, useDrop } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import { BuilderTable } from "@/components/BuilderTable/BuilderTable";
-import { useCallback } from "react";
-import useAppState, { TableComponentData, payments } from "@/lib/store";
+import getPrismaInstance from "@/lib/prisma";
+import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,7 +16,6 @@ export const ItemTypes = {
 
 
 export default function Home() {
-  const components = useAppState((state) => state.components);
   return (
     <DndProvider backend={HTML5Backend}>
       <main
