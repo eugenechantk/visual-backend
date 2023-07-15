@@ -18,19 +18,25 @@ import {
 import { PlusIcon } from "lucide-react";
 import useAppState, { TableComponentData, payments } from "@/lib/store";
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
+// TODO: Data type and value type of the table
+// interface DataTableProps<TData, TValue> {
+//   columns: ColumnDef<TData, TValue>[];
+//   data: TData[];
+// }
+
+interface DataTableProps {
+  componentId: string;
 }
 
-export function BuilderTable<TData, TValue>({
-  data,
-}: DataTableProps<TData, TValue>) {
+export function BuilderTable({
+  componentId,
+}: DataTableProps) {
   const updateColumn = useAppState((state) => state.updateColumn);
   const columns = useAppState(
     (state) =>
       (state.components["table-12345678"].data as TableComponentData).columns
   );
+  const data = payments
 
   const addNewColumn = (columnLength: number) => {
     updateColumn("table-12345678", columnLength, {
@@ -53,6 +59,7 @@ export function BuilderTable<TData, TValue>({
           {data.map((row, index) => (
             <TableRow key={index}>
               {columns.map((col, index) => (
+                // @ts-ignore
                 <TableCell key={index}>{row[col.accessorKey]}</TableCell>
               ))}
             </TableRow>

@@ -24,7 +24,7 @@ export default function Home() {
       >
         {/* CANVAS */}
         <div className="w-[1280px] min-h-[720px] bg-white m-6 flex flex-col items-center justify-center">
-          <BuilderTable columns={(components['table-12345678'].data as TableComponentData).columns} data={payments}/>
+          <BuilderTable componentId='table-12345678' />
         </div>
         {/* DATA POPUP */}
         <DatabasePanelContainer />
