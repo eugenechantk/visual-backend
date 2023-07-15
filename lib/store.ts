@@ -39,9 +39,13 @@ export const payments: Payment[] = [
   },
 ];
 
+type TableColumn = {
+  accessorKey: string, header: string
+}
+
 export type TableComponentData = {
   table_name: string;
-  columns: ColumnDef<any>[];
+  columns: TableColumn[];
 };
 
 type TextComponentData = {
@@ -56,7 +60,7 @@ type AppState = {
 };
 
 type AppAction = {
-  updateColumn: (componentId: string, columnId: number, newColumn: ColumnDef<any>) => void;
+  updateColumn: (componentId: string, columnId: number, newColumn: TableColumn) => void;
 }
 
 const initAppState: AppState = {
@@ -73,6 +77,10 @@ const initAppState: AppState = {
           {
             accessorKey: "email",
             header: "Email",
+          },
+          {
+            accessorKey: "id",
+            header: "Id",
           }
         ]
       }
@@ -82,7 +90,7 @@ const initAppState: AppState = {
 
 export const useAppState = create<AppState & AppAction>((set) => ({
   components: initAppState.components,
-  updateColumn: (componentId: string, columnId: number, newColumn: ColumnDef<any>) => set((state) => ({
+  updateColumn: (componentId: string, columnId: number, newColumn: TableColumn) => set((state) => ({
     components: {
       ...state.components,
       [componentId]: {
