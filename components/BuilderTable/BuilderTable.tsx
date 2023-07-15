@@ -1,13 +1,5 @@
 import * as React from "react";
 import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  SortingState,
-  getSortedRowModel,
-} from "@tanstack/react-table";
-import {
   Table,
   TableBody,
   TableCell,
@@ -16,68 +8,70 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PlusIcon } from "lucide-react";
-import useTableState from "@/lib/store";
+import useAppState, { TableComponentData, payments } from "@/lib/store";
 
-interface DataTableProps<TData, TValue> {
-  columns: ColumnDef<TData, TValue>[];
-  data: TData[];
+// TODO: Data type and value type of the table
+// interface DataTableProps<TData, TValue> {
+//   columns: ColumnDef<TData, TValue>[];
+//   data: TData[];
+// }
+
+type TData = {
+  [key: string]: any; 
 }
 
-export function BuilderTable<TData, TValue>({
-  columns,
-  data,
-}: DataTableProps<TData, TValue>) {
-  const [sorting, setSorting] = React.useState<SortingState>([]);
-  const table = useReactTable({
-    data,
-    columns,
-    getCoreRowModel: getCoreRowModel(),
-    onSortingChange: setSorting,
-    getSortedRowModel: getSortedRowModel(),
-    state: {
-      sorting,
-    },
-  });
-  const addNewColumn = useTableState((state) => state.addNewColumn);
+interface DataTableProps {
+  componentId: string;
+}
+
+export function BuilderTable({ componentId }: DataTableProps) {
+  const updateColumn = useAppState((state) => state.updateColumn);
+  const tableState = useAppState(
+    (state) =>
+      state.components[componentId].data as TableComponentData
+  );
+  const [data, setData] = React.useState<[]>([]);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      const url = `/api/fetch?table=${tableState.source_data_table}`;
+      fetch(url).then((res) => res.json()).then((data) => {setData(data.results)})
+    }
+    fetchData();
+  }, [tableState.source_data_table]);
+
+
+  const addNewColumn = (columnLength: number) => {
+    updateColumn(componentId, columnLength, {
+      accessorKey: "new",
+      header: "",
+    });
+  };
 
   return (
     <div className="flex flex-row">
       <Table className="rounded-md border">
         <TableHeader>
-          {table.getHeaderGroups().map((headerGroup) => (
-            <TableRow key={headerGroup.id}>
-              {headerGroup.headers.map((header, index) => {
-                return (
-                  <TableHead key={index} index={header.index}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </TableHead>
-                );
-              })}
-            </TableRow>
-          ))}
+          <TableRow>
+            {tableState.columns.map((column, index) => (
+              <TableHead key={index} index={index} componentId={componentId}>{column.header}</TableHead>
+            ))}
+          </TableRow>
         </TableHeader>
         <TableBody>
-          {table.getRowModel().rows?.length ? (
-            table.getRowModel().rows.map((row, index) => (
-              <TableRow
-                key={index}
-                data-state={row.getIsSelected() && "selected"}
-              >
-                {row.getVisibleCells().map((cell, index) => (
-                  <TableCell key={index}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
+          {data.length > 0 ? (
+            // @ts-ignore
+            data.map((row, index) => (
+              <TableRow key={index}>
+                {tableState.columns.map((col, index) => (
+                  // @ts-ignore
+                  <TableCell key={index}>{row[col.accessorKey]}</TableCell>
                 ))}
               </TableRow>
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
+              <TableCell colSpan={tableState.columns.length} className="h-24 text-center">
                 No results.
               </TableCell>
             </TableRow>
@@ -86,7 +80,7 @@ export function BuilderTable<TData, TValue>({
       </Table>
       <button
         className="px-2 py-1 w-fit h-fit bg-white border border-gray-200"
-        onClick={() => addNewColumn(columns.length)}
+        onClick={() => addNewColumn(tableState.columns.length)}
       >
         <PlusIcon />
       </button>

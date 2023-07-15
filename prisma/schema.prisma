@@ -1,0 +1,27 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["jsonProtocol"]
+}
+
+datasource db {
+  provider          = "postgresql"
+  url               = env("POSTGRES_PRISMA_URL")
+  directUrl         = env("POSTGRES_URL_NON_POOLING")
+  shadowDatabaseUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+model Payments {
+  id            String    @id @default(uuid())
+  amount        Float
+  status        String
+  email         String    @unique
+  loanStartDate DateTime
+  loanEndDate   DateTime?
+  amountPaid    Float?
+}
+
+model User {
+  id    String @id @default(uuid())
+  name  String
+  email String @unique
+}
