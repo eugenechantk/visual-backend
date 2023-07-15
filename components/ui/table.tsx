@@ -3,7 +3,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useDrop } from "react-dnd";
 import { ItemTypes } from "@/pages";
-import useTableState from "@/lib/store";
+import useAppState from "@/lib/store";
 
 const Table = React.forwardRef<
   HTMLTableElement,
@@ -76,7 +76,7 @@ interface TableHeadProps extends React.ThHTMLAttributes<HTMLTableCellElement> {
 
 const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
   ({ className, index, ...props }) => {
-    const updateColumn = useTableState((state) => state.updateColumn);
+    const updateColumn = useAppState((state) => state.updateColumn)
     const [showInlineMenu, setShowInlineMenu] = React.useState(false);
     const [leftOffset, setLeftOffset] = React.useState(0);
     const headerRef = React.useRef<HTMLTableCellElement>(null);
@@ -91,7 +91,7 @@ const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
           accessorKey: item.id,
           header: item.field_name,
         };
-        updateColumn(index!, newColumn);
+        updateColumn('table-12345678', index!, newColumn);
         return undefined;
       },
       collect: (monitor) => ({

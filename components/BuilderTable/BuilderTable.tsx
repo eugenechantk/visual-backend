@@ -16,7 +16,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { PlusIcon } from "lucide-react";
-import useTableState from "@/lib/store";
+import useAppState from "@/lib/store";
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
@@ -28,6 +28,7 @@ export function BuilderTable<TData, TValue>({
   data,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
+  const updateColumn = useAppState((state) => state.updateColumn);
   const table = useReactTable({
     data,
     columns,
@@ -38,7 +39,13 @@ export function BuilderTable<TData, TValue>({
       sorting,
     },
   });
-  const addNewColumn = useTableState((state) => state.addNewColumn);
+  
+  const addNewColumn = (columnLength: number) => {
+    updateColumn('table-12345678', columnLength, {
+      id: "new",
+      header: "",
+    })
+  }
 
   return (
     <div className="flex flex-row">
