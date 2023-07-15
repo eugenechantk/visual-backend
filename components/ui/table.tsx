@@ -97,9 +97,9 @@ const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
         columnName: string;
         displayName: string;
       }) => {
-        console.log(
-          `dropped ${item.displayName} from ${item.tableName} at column_id ${index}`
-        );
+        // console.log(
+        //   `dropped ${item.displayName} from ${item.tableName} at column_id ${index}`
+        // );
 
         if (index === 0) {
           updateTableSourceData(componentId, item.tableName.toLowerCase());
