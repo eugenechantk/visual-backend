@@ -29,19 +29,21 @@ const badgeVariants = cva(
 export interface DragableBadgeProps
   extends React.HTMLAttributes<HTMLDivElement>,
     VariantProps<typeof badgeVariants> {
-      name: string,
-      id: string,
+      tableName: string,
+      columnName: string,
     }
 
-export default function DraggableFieldTag({name, id, className, variant, ...props}: DragableBadgeProps) {
+export default function DraggableFieldTag({tableName, columnName, className, variant, ...props}: DragableBadgeProps) {
+  const formattedColumnName = columnName.replace(/([A-Z])/g, ' $1')
+  const displayName = formattedColumnName.charAt(0).toUpperCase() + formattedColumnName.slice(1);
   const [{ isDragging }, drag] = useDrag(() => ({
     type: ItemTypes.FIELD_TAGS,
-    item: { id: id, field_name: name },
+    item: { tableName, columnName, displayName },
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging()
     })
   }))
   return (
-    <div className={cn(badgeVariants({ variant }), className)} {...props} ref={drag}>{name}</div>
+    <div className={cn(badgeVariants({ variant }), className)} {...props} ref={drag}>{displayName}</div>
   )
 }
