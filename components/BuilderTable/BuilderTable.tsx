@@ -17,6 +17,8 @@ import {
 } from "@/components/ui/table";
 import { PlusIcon } from "lucide-react";
 import useAppState, { TableComponentData, payments } from "@/lib/store";
+import getPrismaInstance from "@/lib/prisma";
+import { PrismaClient } from "@prisma/client";
 
 // TODO: Data type and value type of the table
 // interface DataTableProps<TData, TValue> {
@@ -24,19 +26,29 @@ import useAppState, { TableComponentData, payments } from "@/lib/store";
 //   data: TData[];
 // }
 
+type TData = {
+  [key: string]: any; 
+}
+
 interface DataTableProps {
   componentId: string;
 }
 
-export function BuilderTable({
-  componentId,
-}: DataTableProps) {
+export function BuilderTable({ componentId }: DataTableProps) {
   const updateColumn = useAppState((state) => state.updateColumn);
   const columns = useAppState(
     (state) =>
       (state.components["table-12345678"].data as TableComponentData).columns
   );
-  const data = payments
+  const [data, setData] = React.useState<[]>([]);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      fetch('/api/fetch?table=payments').then((res) => res.json()).then((data) => {setData(data.results)})
+    }
+    fetchData();
+  }, []);
+
 
   const addNewColumn = (columnLength: number) => {
     updateColumn("table-12345678", columnLength, {
@@ -56,14 +68,23 @@ export function BuilderTable({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {data.map((row, index) => (
-            <TableRow key={index}>
-              {columns.map((col, index) => (
-                // @ts-ignore
-                <TableCell key={index}>{row[col.accessorKey]}</TableCell>
-              ))}
+          {data.length > 0 ? (
+            // @ts-ignore
+            data.map((row, index) => (
+              <TableRow key={index}>
+                {columns.map((col, index) => (
+                  // @ts-ignore
+                  <TableCell key={index}>{row[col.accessorKey]}</TableCell>
+                ))}
+              </TableRow>
+            ))
+          ) : (
+            <TableRow>
+              <TableCell colSpan={columns.length} className="h-24 text-center">
+                No results.
+              </TableCell>
             </TableRow>
-          ))}
+          )}
         </TableBody>
       </Table>
       <button
