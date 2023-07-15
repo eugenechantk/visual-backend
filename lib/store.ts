@@ -44,7 +44,7 @@ type TableColumn = {
 }
 
 export type TableComponentData = {
-  table_name: string;
+  source_data_table: string;
   columns: TableColumn[];
 };
 
@@ -68,7 +68,7 @@ const initAppState: AppState = {
     "table-12345678": {
       component_type: "table",
       data: {
-        table_name: "Payments",
+        source_data_table: "payments",
         columns: [
           {
             accessorKey: "status",

@@ -36,18 +36,19 @@ interface DataTableProps {
 
 export function BuilderTable({ componentId }: DataTableProps) {
   const updateColumn = useAppState((state) => state.updateColumn);
-  const columns = useAppState(
+  const tableState = useAppState(
     (state) =>
-      (state.components["table-12345678"].data as TableComponentData).columns
+      state.components[componentId].data as TableComponentData
   );
   const [data, setData] = React.useState<[]>([]);
 
   React.useEffect(() => {
     const fetchData = async () => {
-      fetch('/api/fetch?table=payments').then((res) => res.json()).then((data) => {setData(data.results)})
+      const url = `/api/fetch?table=${tableState.source_data_table}`;
+      fetch(url).then((res) => res.json()).then((data) => {setData(data.results)})
     }
     fetchData();
-  }, []);
+  }, [tableState]);
 
 
   const addNewColumn = (columnLength: number) => {
@@ -62,7 +63,7 @@ export function BuilderTable({ componentId }: DataTableProps) {
       <Table className="rounded-md border">
         <TableHeader>
           <TableRow>
-            {columns.map((column, index) => (
+            {tableState.columns.map((column, index) => (
               <TableHead key={index}>{column.header}</TableHead>
             ))}
           </TableRow>
@@ -72,7 +73,7 @@ export function BuilderTable({ componentId }: DataTableProps) {
             // @ts-ignore
             data.map((row, index) => (
               <TableRow key={index}>
-                {columns.map((col, index) => (
+                {tableState.columns.map((col, index) => (
                   // @ts-ignore
                   <TableCell key={index}>{row[col.accessorKey]}</TableCell>
                 ))}
@@ -80,7 +81,7 @@ export function BuilderTable({ componentId }: DataTableProps) {
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={columns.length} className="h-24 text-center">
+              <TableCell colSpan={tableState.columns.length} className="h-24 text-center">
                 No results.
               </TableCell>
             </TableRow>
@@ -89,7 +90,7 @@ export function BuilderTable({ componentId }: DataTableProps) {
       </Table>
       <button
         className="px-2 py-1 w-fit h-fit bg-white border border-gray-200"
-        onClick={() => addNewColumn(columns.length)}
+        onClick={() => addNewColumn(tableState.columns.length)}
       >
         <PlusIcon />
       </button>
