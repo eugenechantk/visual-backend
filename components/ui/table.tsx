@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { useDrop } from "react-dnd";
 import { ItemTypes } from "@/pages";
 import useAppState, { TableComponentData } from "@/lib/store";
-import { startCase } from 'lodash';
+import { useDetectClickOutside } from 'react-detect-click-outside';
 
 const Table = React.forwardRef<
   HTMLTableElement,
@@ -78,20 +78,31 @@ interface TableHeadProps extends React.ThHTMLAttributes<HTMLTableCellElement> {
 
 const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
   ({ className, index, componentId, ...props }) => {
-    const [componentData, updateColumn, updateTableSourceData] = useAppState((state) => [state.components[componentId].data as TableComponentData, state.updateColumn, state.updateTableSourceData])
+    const [componentData, updateColumn, updateTableSourceData] = useAppState(
+      (state) => [
+        state.components[componentId].data as TableComponentData,
+        state.updateColumn,
+        state.updateTableSourceData,
+      ]
+    );
     const [showInlineMenu, setShowInlineMenu] = React.useState(false);
     const [leftOffset, setLeftOffset] = React.useState(0);
     const headerRef = React.useRef<HTMLTableCellElement>(null);
+    const popUpRef = useDetectClickOutside({ onTriggered: () => {setShowInlineMenu(false)} });
 
     const [{ isOver }, drop] = useDrop(() => ({
       accept: ItemTypes.FIELD_TAGS,
-      drop: (item: { tableName: string; columnName: string; displayName: string }) => {
+      drop: (item: {
+        tableName: string;
+        columnName: string;
+        displayName: string;
+      }) => {
         console.log(
           `dropped ${item.displayName} from ${item.tableName} at column_id ${index}`
         );
-        
+
         if (index === 0) {
-          updateTableSourceData(componentId, item.tableName.toLowerCase())
+          updateTableSourceData(componentId, item.tableName.toLowerCase());
         }
 
         const newColumn = {
@@ -110,15 +121,15 @@ const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
     React.useEffect(() => {
       if (headerRef.current) {
         const columnWidth = headerRef.current.getBoundingClientRect().width;
-        setLeftOffset((columnWidth-32-120) / 2)
+        setLeftOffset((columnWidth - 32 - 120) / 2);
       }
-    }, []);
+    }, [componentData.columns[index!]]);
 
     return (
       <th
         ref={(el: HTMLTableCellElement) => {
           // @ts-ignore
-          drop(el); headerRef.current = el;
+          drop(el); headerRef.current = el; popUpRef.current = el;
         }}
         className={cn(
           "h-12 px-4 text-left align-middle font-medium text-slate-500 [&:has([role=checkbox])]:pr-0 dark:text-slate-400 cursor-pointer relative",

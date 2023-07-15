@@ -33,7 +33,6 @@ export function BuilderTable({ componentId }: DataTableProps) {
   const [data, setData] = React.useState<[]>([]);
 
   React.useEffect(() => {
-    console.log(tableState)
     const fetchData = async () => {
       const url = `/api/fetch?table=${tableState.source_data_table}`;
       fetch(url).then((res) => res.json()).then((data) => {setData(data.results)})
