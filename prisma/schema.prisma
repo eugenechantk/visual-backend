@@ -19,3 +19,9 @@ model Payments {
   loanEndDate   DateTime?
   amountPaid    Float?
 }
+
+model User {
+  id            String    @id @default(uuid())
+  name        String
+  email         String    @unique
+}

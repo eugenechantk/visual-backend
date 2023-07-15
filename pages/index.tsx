@@ -14,8 +14,28 @@ export const ItemTypes = {
   FIELD_TAGS: "field-tags",
 };
 
+export const getServerSideProps: GetServerSideProps = async () => {
+  const prisma = getPrismaInstance();
+  const dbSchema: [] = await prisma.$queryRaw`
+  SELECT table_name, column_name 
+  FROM information_schema.columns 
+  WHERE table_schema = 'public';`;
+  const transformedSchema = dbSchema.reduce((result, { table_name, column_name }) => {
+    if (!result[table_name]) {
+      result[table_name] = { columns: [] };
+    }
+    result[table_name].columns.push(column_name);
+    return result
+  }, {} as { [key: string]: { columns: string[] } });
+  return {
+    props: {
+      schema: JSON.parse(JSON.stringify(transformedSchema)),
+    },
+  };
+}
 
-export default function Home() {
+
+export default function Home(props: any): InferGetServerSidePropsType<typeof getServerSideProps> {
   return (
     <DndProvider backend={HTML5Backend}>
       <main
@@ -26,7 +46,7 @@ export default function Home() {
           <BuilderTable componentId='table-12345678' />
         </div>
         {/* DATA POPUP */}
-        <DatabasePanelContainer />
+        <DatabasePanelContainer schema={props.schema }/>
       </main>
     </DndProvider>
   );

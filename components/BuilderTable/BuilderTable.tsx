@@ -1,13 +1,5 @@
 import * as React from "react";
 import {
-  ColumnDef,
-  flexRender,
-  getCoreRowModel,
-  useReactTable,
-  SortingState,
-  getSortedRowModel,
-} from "@tanstack/react-table";
-import {
   Table,
   TableBody,
   TableCell,
@@ -17,8 +9,6 @@ import {
 } from "@/components/ui/table";
 import { PlusIcon } from "lucide-react";
 import useAppState, { TableComponentData, payments } from "@/lib/store";
-import getPrismaInstance from "@/lib/prisma";
-import { PrismaClient } from "@prisma/client";
 
 // TODO: Data type and value type of the table
 // interface DataTableProps<TData, TValue> {
@@ -43,16 +33,17 @@ export function BuilderTable({ componentId }: DataTableProps) {
   const [data, setData] = React.useState<[]>([]);
 
   React.useEffect(() => {
+    console.log(tableState)
     const fetchData = async () => {
       const url = `/api/fetch?table=${tableState.source_data_table}`;
       fetch(url).then((res) => res.json()).then((data) => {setData(data.results)})
     }
     fetchData();
-  }, [tableState]);
+  }, [tableState.source_data_table]);
 
 
   const addNewColumn = (columnLength: number) => {
-    updateColumn("table-12345678", columnLength, {
+    updateColumn(componentId, columnLength, {
       accessorKey: "new",
       header: "",
     });
@@ -64,7 +55,7 @@ export function BuilderTable({ componentId }: DataTableProps) {
         <TableHeader>
           <TableRow>
             {tableState.columns.map((column, index) => (
-              <TableHead key={index}>{column.header}</TableHead>
+              <TableHead key={index} index={index} componentId={componentId}>{column.header}</TableHead>
             ))}
           </TableRow>
         </TableHeader>

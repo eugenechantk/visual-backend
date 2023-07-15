@@ -61,6 +61,7 @@ type AppState = {
 
 type AppAction = {
   updateColumn: (componentId: string, columnId: number, newColumn: TableColumn) => void;
+  updateTableSourceData: (componentId: string, newSourceData: string) => void;
 }
 
 const initAppState: AppState = {
@@ -68,19 +69,19 @@ const initAppState: AppState = {
     "table-12345678": {
       component_type: "table",
       data: {
-        source_data_table: "payments",
+        source_data_table: "",
         columns: [
           {
-            accessorKey: "status",
-            header: "Status",
+            accessorKey: "new",
+            header: "",
           },
           {
-            accessorKey: "email",
-            header: "Email",
+            accessorKey: "new",
+            header: "",
           },
           {
-            accessorKey: "id",
-            header: "Id",
+            accessorKey: "new",
+            header: "",
           }
         ]
       }
@@ -106,6 +107,18 @@ export const useAppState = create<AppState & AppAction>((set) => ({
       }
     }
   })),
+  updateTableSourceData: (componentId: string, newSourceData: string) => set((state) => ({
+    components: {
+      ...state.components,
+      [componentId]: {
+        ...state.components[componentId],
+        data: {
+          ...state.components[componentId].data,
+          source_data_table: newSourceData
+        }
+      }
+    }
+  }))
 }));
 
 export default useAppState;

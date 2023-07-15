@@ -3,7 +3,8 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 import { useDrop } from "react-dnd";
 import { ItemTypes } from "@/pages";
-import useAppState from "@/lib/store";
+import useAppState, { TableComponentData } from "@/lib/store";
+import { startCase } from 'lodash';
 
 const Table = React.forwardRef<
   HTMLTableElement,
@@ -72,26 +73,33 @@ TableRow.displayName = "TableRow";
 interface TableHeadProps extends React.ThHTMLAttributes<HTMLTableCellElement> {
   droppable?: boolean;
   index?: number;
+  componentId: string;
 }
 
 const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
-  ({ className, index, ...props }) => {
-    const updateColumn = useAppState((state) => state.updateColumn)
+  ({ className, index, componentId, ...props }) => {
+    const [componentData, updateColumn, updateTableSourceData] = useAppState((state) => [state.components[componentId].data as TableComponentData, state.updateColumn, state.updateTableSourceData])
     const [showInlineMenu, setShowInlineMenu] = React.useState(false);
     const [leftOffset, setLeftOffset] = React.useState(0);
     const headerRef = React.useRef<HTMLTableCellElement>(null);
 
     const [{ isOver }, drop] = useDrop(() => ({
       accept: ItemTypes.FIELD_TAGS,
-      drop: (item: { id: string; field_name: string }) => {
+      drop: (item: { tableName: string; columnName: string; displayName: string }) => {
         console.log(
-          `dropped ${item.field_name} with id ${item.id} at column_id ${index}`
+          `dropped ${item.displayName} from ${item.tableName} at column_id ${index}`
         );
+        
+        if (index === 0) {
+          updateTableSourceData(componentId, item.tableName.toLowerCase())
+        }
+
         const newColumn = {
-          accessorKey: item.id,
-          header: item.field_name,
+          accessorKey: item.columnName,
+          header: item.displayName,
         };
-        updateColumn('table-12345678', index!, newColumn);
+
+        updateColumn(componentId, index!, newColumn);
         return undefined;
       },
       collect: (monitor) => ({
