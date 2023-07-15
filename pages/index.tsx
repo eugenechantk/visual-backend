@@ -19,7 +19,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
   const dbSchema: [] = await prisma.$queryRaw`
   SELECT table_name, column_name 
   FROM information_schema.columns 
-  WHERE table_schema = 'public';`;
+  WHERE table_schema = 'public' AND table_name !~ '^_'`;
   const transformedSchema = dbSchema.reduce((result, { table_name, column_name }) => {
     if (!result[table_name]) {
       result[table_name] = { columns: [] };
