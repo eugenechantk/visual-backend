@@ -8,6 +8,8 @@ import { BuilderTable } from "@/components/BuilderTable/BuilderTable";
 import getPrismaInstance from "@/lib/prisma";
 import { GetServerSideProps, InferGetServerSidePropsType } from "next";
 import { PrismaClient } from "@prisma/client";
+import HeaderButton from "@/components/Header";
+import PreviewButton from "@/components/PreviewButton";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -67,11 +69,16 @@ export default function Home(
   return (
     <DndProvider backend={HTML5Backend}>
       <main
-        className={`min-h-screen ${inter.className} bg-gray-100 overflow-scroll flex justify-center items-center`}
+        className={`h-screen ${inter.className} flex flex-col relative bg-gray-100`}
       >
+        {/* HEADER */}
+        <HeaderButton />
+        <PreviewButton />
         {/* CANVAS */}
-        <div className="w-[1280px] min-h-[800px] bg-white m-6 flex flex-col items-center justify-center">
-          <BuilderTable componentId="table-12345678" />
+        <div className="grow overflow-scroll flex flex-col items-center pt-6">
+          <div className="w-[1280px] min-h-[800px] bg-white m-6 flex flex-col items-center justify-center">
+            <BuilderTable componentId="table-12345678" />
+          </div>
         </div>
         {/* DATA POPUP */}
         <DatabasePanelContainer schema={props.schema} />

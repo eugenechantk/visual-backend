@@ -20,9 +20,9 @@ export default function DatabasePanelContainer({
   const [activeTable, setActiveTable] = React.useState(schema[0].table_name);
 
   return (
-    <div className="absolute bottom-0 min-w-full">
+    <div className="w-full h-fit relative">
       <button
-        className="px-2 py-1 bg-white border-t border-x border-gray-200"
+        className="absolute -top-[33px] left-0 px-2 py-1 bg-white border-t border-x border-gray-200"
         onClick={() => setIsOpen(!isOpen)}
       >
         {isOpen ? "Close" : "Open"}
