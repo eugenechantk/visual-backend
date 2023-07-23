@@ -46,17 +46,6 @@ export function BuilderTable({ componentId }: DataTableProps) {
     fetchData();
   }, [tableState.source_data_table]);
 
-  React.useEffect(() => {
-    console.log(tableState)
-  }, [tableState])
-
-  const addNewColumn = (columnLength: number) => {
-    updateColumn(componentId, columnLength, {
-      accessorKey: "new",
-      header: "",
-    });
-  };
-
   return (
     <div className="flex flex-row">
       <Table className="rounded-md border">
@@ -92,12 +81,6 @@ export function BuilderTable({ componentId }: DataTableProps) {
           )}
         </TableBody>
       </Table>
-      <button
-        className="px-2 py-1 w-fit h-fit bg-white border border-gray-200"
-        onClick={() => addNewColumn(tableState.columns.length)}
-      >
-        <PlusIcon />
-      </button>
     </div>
   );
 }
