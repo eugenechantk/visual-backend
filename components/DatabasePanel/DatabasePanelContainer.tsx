@@ -1,15 +1,24 @@
-import React from "react";
+import React, { useEffect } from "react";
 import DraggableFieldTag from "./DraggableFieldTag";
+import { TableSchema } from "@/pages";
+import * as Tabs from "@radix-ui/react-tabs";
+import TablePreview from "./TablePreview";
+
+const TabOptions = {
+  DATA: "Add Data",
+  PROPERTIES: "Properties",
+};
 
 export default function DatabasePanelContainer({
-  className,
   schema,
   ...props
 }: {
-  className?: string;
-  schema: Record<string, { columns: string[] }>;
+  schema: TableSchema[];
 }) {
   const [isOpen, setIsOpen] = React.useState(true);
+  const [activeTab, setActiveTab] = React.useState(TabOptions.DATA);
+  const [activeTable, setActiveTable] = React.useState(schema[0].table_name);
+
   return (
     <div className="absolute bottom-0 min-w-full">
       <button
@@ -19,20 +28,66 @@ export default function DatabasePanelContainer({
         {isOpen ? "Close" : "Open"}
       </button>
       <div
-        className={`w-full h-[200px] overflow-y-scroll bg-white border-t border-gray-200 ${className} ${
+        className={`w-full h-[300px] overflow-y-scroll bg-white border-t border-gray-200 flex flex-row ${
           isOpen ? "visible" : "hidden"
         }`}
       >
-        <div className="flex flex-row flex-wrap gap-2 m-4">
-          {Object.entries(schema).map(([key, value], index) => (
-            <div key={index} className="flex flex-col gap-2">
-              <h3>{key}</h3>
-              {value.columns.map((column, index) => (
-                <DraggableFieldTag key={index} tableName={key.toLowerCase()} columnName={column} />
+        {/* SELECTOR PANEL */}
+        <div className="bg-white flex-col flex items-start border-r border-[#9ca3af] h-full w-[400px]">
+          <Tabs.Root
+            className="w-full"
+            defaultValue={activeTab}
+            onValueChange={(e) => setActiveTab(e)}
+          >
+            <Tabs.List className="w-full flex items-start gap-6 px-5 border-b border-[#e5e7eb] text-lg leading-[22px] font-medium text-black font-Inter">
+              {Object.entries(TabOptions).map(([key, value], index) => (
+                <Tabs.Trigger
+                  key={index}
+                  value={value}
+                  className="flex justify-center items-center gap-1 py-5 data-[state=active]:border-b-2 data-[state=active]:border-black"
+                >
+                  {value}
+                </Tabs.Trigger>
               ))}
-            </div>
-          ))}
-          {/* {Object.values(paymentTableSchema).map((key, index) => (<DraggableFieldTag key={index} id={key.id} name={key.name} />))} */}
+            </Tabs.List>
+          </Tabs.Root>
+          {/* ADD DATA */}
+          {activeTab === TabOptions.DATA && (
+            <Tabs.Root
+              orientation="vertical"
+              className="w-full px-2 pt-4"
+              defaultValue={activeTable}
+              onValueChange={(e) => setActiveTable(e)}
+            >
+              <Tabs.List className="flex flex-col gap-2 w-full">
+                {schema.map((table, index) => (
+                  <Tabs.Trigger
+                    className="data-[state=active]:bg-[#f3f4f6] w-full flex justify-between items-center p-3 rounded"
+                    value={table.table_name}
+                    key={index}
+                  >
+                    <div className="text-lg leading-[22px] text-black font-sans">
+                      {table.table_name}
+                    </div>
+                    <div className="text-sm leading-[16px] text-[#6b7280] font-mono">
+                      {`${table.rowCount} records`}
+                    </div>
+                  </Tabs.Trigger>
+                ))}
+              </Tabs.List>
+            </Tabs.Root>
+          )}
+        </div>
+        {/* PROPERTIES */}
+        <div className="grow h-full overflow-y-scroll">
+          {/* PREVIEW TABLE */}
+          <TablePreview
+            schema={
+              schema[
+                schema.findIndex((table) => table.table_name === activeTable)
+              ]
+            }
+          />
         </div>
       </div>
     </div>

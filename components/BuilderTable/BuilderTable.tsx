@@ -1,5 +1,6 @@
 import * as React from "react";
 import {
+  BuilderTableHead,
   Table,
   TableBody,
   TableCell,
@@ -17,8 +18,8 @@ import useAppState, { TableComponentData, payments } from "@/lib/store";
 // }
 
 type TData = {
-  [key: string]: any; 
-}
+  [key: string]: any;
+};
 
 interface DataTableProps {
   componentId: string;
@@ -27,19 +28,23 @@ interface DataTableProps {
 export function BuilderTable({ componentId }: DataTableProps) {
   const updateColumn = useAppState((state) => state.updateColumn);
   const tableState = useAppState(
-    (state) =>
-      state.components[componentId].data as TableComponentData
+    (state) => state.components[componentId].data as TableComponentData
   );
   const [data, setData] = React.useState<[]>([]);
 
   React.useEffect(() => {
     const fetchData = async () => {
       const url = `/api/fetch?table=${tableState.source_data_table}`;
-      fetch(url).then((res) => res.json()).then((data) => {setData(data.results)})
-    }
+      fetch(url)
+        .then((res) => res.json())
+        .then((data) => {
+          if (Object.keys(data).length > 0){
+            setData(data.results);
+          }
+        });
+    };
     fetchData();
   }, [tableState.source_data_table]);
-
 
   const addNewColumn = (columnLength: number) => {
     updateColumn(componentId, columnLength, {
@@ -54,7 +59,9 @@ export function BuilderTable({ componentId }: DataTableProps) {
         <TableHeader>
           <TableRow>
             {tableState.columns.map((column, index) => (
-              <TableHead key={index} index={index} componentId={componentId}>{column.header}</TableHead>
+              <BuilderTableHead key={index} index={index} componentId={componentId}>
+                {column.header}
+              </BuilderTableHead>
             ))}
           </TableRow>
         </TableHeader>
@@ -71,7 +78,10 @@ export function BuilderTable({ componentId }: DataTableProps) {
             ))
           ) : (
             <TableRow>
-              <TableCell colSpan={tableState.columns.length} className="h-24 text-center">
+              <TableCell
+                colSpan={tableState.columns.length}
+                className="h-24 text-center"
+              >
                 No results.
               </TableCell>
             </TableRow>

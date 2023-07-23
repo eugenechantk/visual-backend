@@ -70,13 +70,13 @@ const TableRow = React.forwardRef<
 ));
 TableRow.displayName = "TableRow";
 
-interface TableHeadProps extends React.ThHTMLAttributes<HTMLTableCellElement> {
+interface BuilderTableHeadProps extends React.ThHTMLAttributes<HTMLTableCellElement> {
   droppable?: boolean;
   index?: number;
   componentId: string;
 }
 
-const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
+const BuilderTableHead = React.forwardRef<HTMLTableCellElement, BuilderTableHeadProps>(
   ({ className, index, componentId, ...props }) => {
     const [componentData, updateColumn, updateTableSourceData] = useAppState(
       (state) => [
@@ -156,7 +156,29 @@ const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
     );
   }
 );
-TableHead.displayName = "TableHead";
+BuilderTableHead.displayName = "BuilderTableHead";
+
+interface TableHeadProps extends React.ThHTMLAttributes<HTMLTableCellElement> {
+  className?: string;
+  index?: number;
+}
+
+const TableHead = React.forwardRef<HTMLTableCellElement, TableHeadProps>(
+  ({ className, index, ...props }) => {
+    return (
+      <th
+        className={cn(
+          "h-12 px-4 text-left align-middle font-medium text-slate-500 [&:has([role=checkbox])]:pr-0 dark:text-slate-400 cursor-pointer relative",
+          className
+        )}
+        {...props}
+      >
+        {props.children}
+      </th>
+    );
+  }
+);
+TableHead.displayName = "BuilderTableHead";
 
 const TableCell = React.forwardRef<
   HTMLTableCellElement,
@@ -188,6 +210,7 @@ export {
   TableBody,
   TableFooter,
   TableHead,
+  BuilderTableHead,
   TableRow,
   TableCell,
   TableCaption,

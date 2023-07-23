@@ -14,9 +14,14 @@ export default async function handler(
       const results = await prisma[table! as keyof typeof prisma].findMany();
       // console.log("fetch result: ", results);
       res.status(200).json({ results });
+      res.end();
+    } else {
+      res.status(200).json({});
+      res.end();
     }
   } catch (error) {
     console.log(error);
     res.status(500).json({ error });
+    res.end();
   }
 }
