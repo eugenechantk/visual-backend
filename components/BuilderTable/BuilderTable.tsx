@@ -46,6 +46,10 @@ export function BuilderTable({ componentId }: DataTableProps) {
     fetchData();
   }, [tableState.source_data_table]);
 
+  React.useEffect(() => {
+    console.log(tableState)
+  }, [tableState])
+
   const addNewColumn = (columnLength: number) => {
     updateColumn(componentId, columnLength, {
       accessorKey: "new",

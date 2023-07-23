@@ -12,6 +12,7 @@ import DraggableFieldTag from "./DraggableFieldTag";
 
 export default function TablePreview({ schema }: { schema: TableSchema }) {
   const [data, setData] = React.useState<[]>([]);
+  console.log(schema.table_name);
 
   // FETCH DATA TO PREVIEW
   React.useEffect(() => {
@@ -39,10 +40,6 @@ export default function TablePreview({ schema }: { schema: TableSchema }) {
     fetchData();
   }, [schema]);
 
-  React.useEffect(() => {
-    console.log(data);
-  }, [data]);
-
   return (
     <Table className="border-b border-gray-200">
       <TableHeader>
@@ -53,6 +50,7 @@ export default function TablePreview({ schema }: { schema: TableSchema }) {
               className="border-r border-gray-200 last:border-r-0"
             >
               <DraggableFieldTag
+                key={`${schema.table_name}-${column}`}
                 tableName={schema.table_name}
                 columnName={column}
                 draggable

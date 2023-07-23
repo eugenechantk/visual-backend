@@ -39,9 +39,10 @@ export const payments: Payment[] = [
   },
 ];
 
-type TableColumn = {
-  accessorKey: string, header: string
-}
+export type TableColumn = {
+  accessorKey: string;
+  header: string;
+};
 
 export type TableComponentData = {
   source_data_table: string;
@@ -60,9 +61,18 @@ type AppState = {
 };
 
 type AppAction = {
-  updateColumn: (componentId: string, columnId: number, newColumn: TableColumn) => void;
+  updateColumn: (
+    componentId: string,
+    columnId: number,
+    newColumn: TableColumn
+  ) => void;
+  addColumn: (
+    componentId: string,
+    columnId: number,
+  ) => void;
   updateTableSourceData: (componentId: string, newSourceData: string) => void;
-}
+  deleteColumn: (componentId: string, columnId: number) => void;
+};
 
 const initAppState: AppState = {
   components: {
@@ -82,43 +92,99 @@ const initAppState: AppState = {
           {
             accessorKey: "new",
             header: "",
-          }
-        ]
-      }
-    }
-  }
-}
+          },
+        ],
+      },
+    },
+  },
+};
 
 export const useAppState = create<AppState & AppAction>((set) => ({
   components: initAppState.components,
-  updateColumn: (componentId: string, columnId: number, newColumn: TableColumn) => set((state) => ({
-    components: {
-      ...state.components,
-      [componentId]: {
-        ...state.components[componentId],
-        data: {
-          ...state.components[componentId].data,
-          columns: [
-            ...(state.components[componentId].data as TableComponentData).columns.slice(0, columnId),
-            newColumn,
-            ...(state.components[componentId].data as TableComponentData).columns.slice(columnId + 1),
-          ]
-        }
-      }
-    }
-  })),
-  updateTableSourceData: (componentId: string, newSourceData: string) => set((state) => ({
-    components: {
-      ...state.components,
-      [componentId]: {
-        ...state.components[componentId],
-        data: {
-          ...state.components[componentId].data,
-          source_data_table: newSourceData
-        }
-      }
-    }
-  }))
+  addColumn: (componentId: string, columnId: number) =>
+    set((state) => ({
+      components: {
+        ...state.components,
+        [componentId]: {
+          ...state.components[componentId],
+          data: {
+            ...state.components[componentId].data,
+            columns: [
+              ...(
+                state.components[componentId].data as TableComponentData
+              ).columns.slice(0, columnId),
+              {
+                accessorKey: "new",
+                header: "",
+              },
+              ...(
+                state.components[componentId].data as TableComponentData
+              ).columns.slice(columnId),
+            ],
+            // [...(state.components[componentId].data as TableComponentData).columns.splice(columnId, 0, newColumn)]
+          },
+        },
+      },
+    })),
+  updateColumn: (
+    componentId: string,
+    columnId: number,
+    newColumn: TableColumn
+  ) =>
+    set((state) => ({
+      components: {
+        ...state.components,
+        [componentId]: {
+          ...state.components[componentId],
+          data: {
+            ...state.components[componentId].data,
+            columns: [
+              ...(
+                state.components[componentId].data as TableComponentData
+              ).columns.slice(0, columnId),
+              newColumn,
+              ...(
+                state.components[componentId].data as TableComponentData
+              ).columns.slice(columnId + 1),
+            ],
+            // [...(state.components[componentId].data as TableComponentData).columns.splice(columnId, 0, newColumn)]
+          },
+        },
+      },
+    })),
+  deleteColumn: (componentId: string, columnId: number) =>
+    set((state) => ({
+      components: {
+        ...state.components,
+        [componentId]: {
+          ...state.components[componentId],
+          data: {
+            ...state.components[componentId].data,
+            columns: [
+              ...(
+                state.components[componentId].data as TableComponentData
+              ).columns.slice(0, columnId),
+              ...(
+                state.components[componentId].data as TableComponentData
+              ).columns.slice(columnId + 1),
+            ],
+          },
+        },
+      },
+    })),
+  updateTableSourceData: (componentId: string, newSourceData: string) =>
+    set((state) => ({
+      components: {
+        ...state.components,
+        [componentId]: {
+          ...state.components[componentId],
+          data: {
+            ...state.components[componentId].data,
+            source_data_table: newSourceData,
+          },
+        },
+      },
+    })),
 }));
 
 export default useAppState;

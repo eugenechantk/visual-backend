@@ -64,7 +64,6 @@ export const getServerSideProps: GetServerSideProps = async () => {
 export default function Home(
   props: any
 ): InferGetServerSidePropsType<typeof getServerSideProps> {
-  console.log(props.schema);
   return (
     <DndProvider backend={HTML5Backend}>
       <main

@@ -4,7 +4,8 @@ import { cn } from "@/lib/utils";
 import { useDrop } from "react-dnd";
 import { ItemTypes } from "@/pages";
 import useAppState, { TableComponentData } from "@/lib/store";
-import { useDetectClickOutside } from 'react-detect-click-outside';
+import { useDetectClickOutside } from "react-detect-click-outside";
+import TableColumnPopUp from "../BuilderTable/TableColumnPopUp";
 
 const Table = React.forwardRef<
   HTMLTableElement,
@@ -70,92 +71,113 @@ const TableRow = React.forwardRef<
 ));
 TableRow.displayName = "TableRow";
 
-interface BuilderTableHeadProps extends React.ThHTMLAttributes<HTMLTableCellElement> {
+interface BuilderTableHeadProps
+  extends React.ThHTMLAttributes<HTMLTableCellElement> {
   droppable?: boolean;
   index?: number;
   componentId: string;
 }
 
-const BuilderTableHead = React.forwardRef<HTMLTableCellElement, BuilderTableHeadProps>(
-  ({ className, index, componentId, ...props }) => {
-    const [componentData, updateColumn, updateTableSourceData] = useAppState(
-      (state) => [
-        state.components[componentId].data as TableComponentData,
-        state.updateColumn,
-        state.updateTableSourceData,
-      ]
-    );
-    const [showInlineMenu, setShowInlineMenu] = React.useState(false);
-    const [leftOffset, setLeftOffset] = React.useState(0);
-    const headerRef = React.useRef<HTMLTableCellElement>(null);
-    const popUpRef = useDetectClickOutside({ onTriggered: () => {setShowInlineMenu(false)} });
+const BuilderTableHead = React.forwardRef<
+  HTMLTableCellElement,
+  BuilderTableHeadProps
+>(({ className, index, componentId, ...props }) => {
+  const [componentData, updateColumn, addColumn, updateTableSourceData, deleteColumn] = useAppState(
+    (state) => [
+      state.components[componentId].data as TableComponentData,
+      state.updateColumn,
+      state.addColumn,
+      state.updateTableSourceData,
+      state.deleteColumn,
+    ]
+  );
+  const [showInlineMenu, setShowInlineMenu] = React.useState(false);
+  const headerRef = React.useRef<HTMLTableCellElement>(null);
+  const popUpRef = useDetectClickOutside({
+    onTriggered: () => {
+      setShowInlineMenu(false);
+    },
+  });
 
-    const [{ isOver }, drop] = useDrop(() => ({
-      accept: ItemTypes.FIELD_TAGS,
-      drop: (item: {
-        tableName: string;
-        columnName: string;
-        displayName: string;
-      }) => {
-        // console.log(
-        //   `dropped ${item.displayName} from ${item.tableName} at column_id ${index}`
-        // );
+  const [{ isOver }, drop] = useDrop(() => ({
+    accept: ItemTypes.FIELD_TAGS,
+    drop: (item: {
+      tableName: string;
+      columnName: string;
+      displayName: string;
+    }) => {
+      console.log(
+        `dropped ${item.columnName} from ${item.tableName} at column_id ${index}`
+      );
 
-        if (index === 0) {
-          updateTableSourceData(componentId, item.tableName.toLowerCase());
-        }
-
-        const newColumn = {
-          accessorKey: item.columnName,
-          header: item.displayName,
-        };
-
-        updateColumn(componentId, index!, newColumn);
-        return undefined;
-      },
-      collect: (monitor) => ({
-        isOver: monitor.isOver(),
-      }),
-    }));
-
-    React.useEffect(() => {
-      if (headerRef.current) {
-        const columnWidth = headerRef.current.getBoundingClientRect().width;
-        setLeftOffset((columnWidth - 32 - 120) / 2);
+      if (index === 0) {
+        updateTableSourceData(componentId, item.tableName.toLowerCase());
       }
-    }, [componentData.columns[index!]]);
 
-    return (
-      <th
-        ref={(el: HTMLTableCellElement) => {
-          // @ts-ignore
-          drop(el); headerRef.current = el; popUpRef.current = el;
-        }}
-        className={cn(
-          "h-12 px-4 text-left align-middle font-medium text-slate-500 [&:has([role=checkbox])]:pr-0 dark:text-slate-400 cursor-pointer relative",
-          isOver && "outline outline-offset-2 outline-indigo-600 rounded-sm",
-          "hover:outline hover:outline-offset-2 hover:outline-indigo-600 hover:rounded-sm",
-          "active:outline active:outline-offset-2 active:outline-indigo-600 active:rounded-sm",
-          className
-        )}
-        {...props}
-        onClick={() => {
-          console.log(leftOffset)
-          setShowInlineMenu(!showInlineMenu);
-        }}
-      >
-        <div
-          className={cn(
-            `absolute -top-[40px] w-[120px] h-[30px] rounded-sm bg-gray-200`,
-            showInlineMenu ? "visible" : "hidden",
-          )}
-          style={{ marginLeft: leftOffset }}
-        ></div>
-        {props.children}
-      </th>
-    );
-  }
-);
+      const newColumn = {
+        accessorKey: item.columnName,
+        header: item.displayName,
+      };
+
+      updateColumn(componentId, index!, newColumn);
+      return undefined;
+    },
+    collect: (monitor) => ({
+      isOver: monitor.isOver(),
+    }),
+  }));
+
+  // Function to add a new column left of the current column
+  const addNewColumnLeft = () => {
+    console.log("add new column left at index", index);
+    addColumn(componentId, index!);
+  };
+
+  // Function to add a new column right of the current column
+  const addNewColumnRight = () => {
+    console.log("add new column right at index", index! + 1);
+    addColumn(componentId, index! + 1);
+  };
+
+  // Function to delete the current column
+  const removeColumn = () => {
+    deleteColumn(componentId, index!);
+  };
+
+  return (
+    <th
+      ref={(el: HTMLTableCellElement) => {
+        
+        drop(el);
+        // @ts-ignore
+        headerRef.current = el;
+        // @ts-ignore
+        popUpRef.current = el;
+      }}
+      className={cn(
+        "h-12 px-4 text-left align-middle font-medium text-slate-500 [&:has([role=checkbox])]:pr-0 dark:text-slate-400 cursor-pointer relative",
+        isOver && "outline outline-offset-2 outline-indigo-600 rounded-sm",
+        "hover:outline hover:outline-offset-2 hover:outline-indigo-600 hover:rounded-sm",
+        "active:outline active:outline-offset-2 active:outline-indigo-600 active:rounded-sm",
+        className
+      )}
+      {...props}
+      onClick={() => {
+        setShowInlineMenu(!showInlineMenu);
+      }}
+    >
+      <TableColumnPopUp
+        addLeftColumn={addNewColumnLeft}
+        addRightColumn={addNewColumnRight}
+        removeColumn={removeColumn}
+        sourceTable={componentData.source_data_table}
+        item={componentData.columns[index!]}
+        show={showInlineMenu}
+      />
+      {props.children}
+    </th>
+  );
+});
 BuilderTableHead.displayName = "BuilderTableHead";
 
 interface TableHeadProps extends React.ThHTMLAttributes<HTMLTableCellElement> {
